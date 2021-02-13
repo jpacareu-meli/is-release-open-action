@@ -32,12 +32,14 @@ const addWarningComment = () => __awaiter(void 0, void 0, void 0, function* () {
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            console.log('START PROCESS');
             const openRelease = yield hasOpenRelease();
             if (openRelease) {
                 yield addWarningComment();
             }
         }
         catch (error) {
+            console.log('ERROR', error);
             core_1.default.setFailed(error.message);
         }
     });

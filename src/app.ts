@@ -21,11 +21,13 @@ const addWarningComment = async () => {
 
 async function run() {
   try {
+    console.log('START PROCESS');
     const openRelease = await hasOpenRelease()
     if(openRelease) {
       await addWarningComment()
     }
   } catch (error) {
+    console.log('ERROR', error);
     core.setFailed(error.message);
   }
 }

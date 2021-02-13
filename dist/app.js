@@ -16,32 +16,26 @@ const core_1 = __importDefault(require("@actions/core"));
 const github_1 = __importDefault(require("@actions/github"));
 const octonode_1 = __importDefault(require("octonode"));
 const client = octonode_1.default.client(process.env.GITHUB_TOKEN);
-function getOpenPullRequests() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const repo = client.repo(github_1.default.context.payload.repository.full_name);
-        const result = yield repo.prsAsync({ per_page: 100, state: "open" });
-        return result[0];
+const hasOpenRelease = () => __awaiter(void 0, void 0, void 0, function* () {
+    const { owner, repo } = github_1.default.context.repo;
+    console.log(`REPO:"${repo}/${owner}" and PR:${github_1.default.context.payload.pull_request.number}`);
+    const result = yield client.get(`/repos/${repo}/${owner}/pulls?per_page=100&state=open`);
+    console.log(`Length: ${result.length}`);
+    return !!result.findIndex(el => /release\//.test(el.head.ref));
+});
+const addWarningComment = () => __awaiter(void 0, void 0, void 0, function* () {
+    const { owner, repo } = github_1.default.context.repo;
+    yield client.post(`/repos/${repo}/${owner}/pulls/${github_1.default.context.payload.pull_request.number}/comments`, {
+        body: 'MOSCA OPEN PULL REQUEST'
     });
-}
-function addWarningComment() {
-    return __awaiter(this, void 0, void 0, function* () {
-        // get pr id
-        if (github_1.default.context.eventName === 'pull_request') {
-            var ghpr = client.pr(github_1.default.context.payload.repository.full_name, 123);
-            // ghpr.createCommentAs({
-            //   body: 'my comment',
-            //   commit_id: '8cde3b6c5be2c3067cd87ee4117c0f65e30f3e1f', // needed to comment on current time in PR
-            // });
-        }
-    });
-}
+});
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const prs = yield getOpenPullRequests();
-            const prsJSON = JSON.stringify(prs, undefined, 2);
-            console.log(`The OPEN PRs are: ${prsJSON}`);
-            console.log(`Context: ${JSON.stringify(github_1.default.context, undefined, 2)}`);
+            const openRelease = yield hasOpenRelease();
+            if (openRelease) {
+                yield addWarningComment();
+            }
         }
         catch (error) {
             core_1.default.setFailed(error.message);

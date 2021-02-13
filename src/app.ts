@@ -5,14 +5,16 @@ import api  from 'octonode';
 const client = api.client(process.env.GITHUB_TOKEN);
 
 const hasOpenRelease = async () => {
-  console.log(`REPO:"${github.repository}" and PR:${github.event.number}`);
-  const result = await client.get(`/repos/${github.repository}/pulls?per_page=100&state=open`);
+  const { owner, repo } = github.context.repo;
+  console.log(`REPO:"${repo}/${owner}" and PR:${github.context.payload.pull_request.number}`);
+  const result = await client.get(`/repos/${repo}/${owner}/pulls?per_page=100&state=open`);
   console.log(`Length: ${result.length}`);
   return !!result.findIndex(el => /release\//.test(el.head.ref));
 }
 
 const addWarningComment = async () => {
-  await client.post(`/repos/${github.repository}/pulls/${github.event.number}/comments`, {
+  const { owner, repo } = github.context.repo;
+  await client.post(`/repos/${repo}/${owner}/pulls/${github.context.payload.pull_request.number}/comments`, {
     body: 'MOSCA OPEN PULL REQUEST'
   });
 }

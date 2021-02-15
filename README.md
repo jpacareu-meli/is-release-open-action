@@ -9,18 +9,19 @@ How to use this action:
 3. Add into it:
 
 ```yml
+name: 'Check if release is opened'
 on:
   pull_request:
     types:
-      - open
-  push:
+      - opened
 jobs:
-  build:
+  check-release:
+    if: contains(github.head_ref, 'feature/') || contains(github.head_ref, 'hotfix/')
     runs-on: ubuntu-latest
     steps:
-      - name: Check opened release
-        id: hello
-        uses: jpacareu-meli/is-release-open-action@v1
+      - uses: jpacareu-meli/is-release-open-action@v1.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 4. Push your files.

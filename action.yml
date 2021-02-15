@@ -4,3 +4,7 @@ description: 'Detect if there is any open pull request from a "release/**"" bran
 runs:
   using: "node12"
   main: "dist/app.js"
+inputs:
+  GITHUB_TOKEN:
+    description: 'Github token'
+    required: true

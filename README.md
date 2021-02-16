@@ -2,11 +2,13 @@
 
 How to use this action:
 
-1. Create a folder in your project named `.workflows`
+1. Create a folder in your project's root named `.github`
 
-2. Create a file inside of it named `is-release-opened.yml`
+2. Create a folder inside `.github` named `workflows`
 
-3. Add into it:
+3. Create a file inside of `workflows` named `is-release-opened.yml` (or the name you want)
+
+4. Add into the newly created file:
 
 ```yml
 name: 'Check if release is opened'
@@ -24,4 +26,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-4. Push your files.
+4. Commit and push your changes.
+
+5. Open your Pull Request with your new workflow.

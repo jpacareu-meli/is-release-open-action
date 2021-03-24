@@ -37,12 +37,13 @@ const octonode_1 = __importDefault(require("octonode"));
 const token = core.getInput("GITHUB_TOKEN", { required: true });
 const client = octonode_1.default.client(token);
 const { owner, repo } = github.context.repo;
-const { number: prNumber } = github.context.payload.pull_request;
+const { number: prNumber, base } = github.context.payload.pull_request;
+const RELEASE_REGEX = /release\//;
 const octokit = github.getOctokit(token);
 const getOpenRelease = () => __awaiter(void 0, void 0, void 0, function* () {
     const currentRepo = client.repo(`${owner}/${repo}`);
     const result = yield currentRepo.prsAsync({ per_page: 100, state: "open" });
-    return result[0].find((el) => { var _a; return Boolean(/release\//.test((_a = el === null || el === void 0 ? void 0 : el.head) === null || _a === void 0 ? void 0 : _a.ref)); });
+    return result[0].find((el) => { var _a; return Boolean(RELEASE_REGEX.test((_a = el === null || el === void 0 ? void 0 : el.head) === null || _a === void 0 ? void 0 : _a.ref)); });
 });
 const addWarningComment = (release) => __awaiter(void 0, void 0, void 0, function* () {
     yield octokit.pulls.createReview({
@@ -56,11 +57,12 @@ const addWarningComment = (release) => __awaiter(void 0, void 0, void 0, functio
     });
 });
 function run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log('LOG', JSON.stringify(github.context));
             const openRelease = yield getOpenRelease();
-            if (openRelease) {
+            const isSameReleaseBranch = RELEASE_REGEX.test(base === null || base === void 0 ? void 0 : base.ref) && ((base === null || base === void 0 ? void 0 : base.ref) === ((_a = openRelease === null || openRelease === void 0 ? void 0 : openRelease.head) === null || _a === void 0 ? void 0 : _a.ref));
+            if (openRelease && !isSameReleaseBranch) {
                 yield addWarningComment(openRelease);
             }
         }

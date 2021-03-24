@@ -6,14 +6,15 @@ const token = core.getInput("GITHUB_TOKEN", { required: true });
 const client = api.client(token);
 
 const { owner, repo } = github.context.repo;
-const { number: prNumber } = github.context.payload.pull_request;
+const { number: prNumber, base } = github.context.payload.pull_request;
+const RELEASE_REGEX = /release\//;
 
 const octokit = github.getOctokit(token);
 
 const getOpenRelease = async () => {
   const currentRepo = client.repo(`${owner}/${repo}`);
   const result = await currentRepo.prsAsync({ per_page: 100, state: "open" });
-  return result[0].find((el) => Boolean(/release\//.test(el?.head?.ref)));
+  return result[0].find((el) => Boolean(RELEASE_REGEX.test(el?.head?.ref)));
 };
 
 const addWarningComment = async (release) => {
@@ -30,9 +31,10 @@ const addWarningComment = async (release) => {
 
 async function run() {
   try {
-    console.log('LOG', JSON.stringify(github.context));
     const openRelease = await getOpenRelease();
-    if (openRelease) {
+    const isSameReleaseBranch = RELEASE_REGEX.test(base?.ref) && (base?.ref === openRelease?.head?.ref);
+
+    if (openRelease && !isSameReleaseBranch) {
       await addWarningComment(openRelease);
     }
   } catch (error) {

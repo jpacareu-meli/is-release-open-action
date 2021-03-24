@@ -56,10 +56,11 @@ const addWarningComment = (release) => __awaiter(void 0, void 0, void 0, functio
     });
 });
 function run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const openRelease = yield getOpenRelease();
-            if (openRelease) {
+            if (openRelease && !((_a = openRelease.html_url) === null || _a === void 0 ? void 0 : _a.endsWith(prNumber))) {
                 yield addWarningComment(openRelease);
             }
         }

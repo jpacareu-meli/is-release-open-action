@@ -31,7 +31,7 @@ const addWarningComment = async (release) => {
 async function run() {
   try {
     const openRelease = await getOpenRelease();
-    if (openRelease) {
+    if (openRelease && !openRelease.html_url?.endsWith(prNumber)) {
       await addWarningComment(openRelease);
     }
   } catch (error) {

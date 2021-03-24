@@ -30,8 +30,9 @@ const addWarningComment = async (release) => {
 
 async function run() {
   try {
+    console.log('LOG', JSON.stringify(github.context));
     const openRelease = await getOpenRelease();
-    if (openRelease && !openRelease.html_url?.endsWith(prNumber)) {
+    if (openRelease) {
       await addWarningComment(openRelease);
     }
   } catch (error) {
